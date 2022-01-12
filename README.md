@@ -7,16 +7,26 @@ Prometheus exporter for [Puma](https://github.com/puma/puma).
 ## Requirements
 
 - go 1.17+
-- `- docker (buildx for multiarch docker images)`
-- ``
-- `## Build` default value
+- docker - [buildx for multiarch docker images](https://docs.docker.com/buildx/working-with-buildx/#build-multi-platform-images)
+
+## Environment variables
+
+- `CONTROL_URL` default value `http://127.0.0.1:9293` - [control server](https://github.com/puma/puma#controlstatus-server)
+- `AUTH_TOKEN` no default value
+- `BIND_ADDRESS` default value `0.0.0.0:9882` - [prometheus default ports allocation](https://github.com/prometheus/prometheus/wiki/Default-port-allocations)
+
+## Build
 
 ```
 make build
 ```
 
-## Environement variables
+## Docker image
 
-- `CONTROL_URL` default value `http://127.0.0.1:9293` - [control server](https://github.com/puma/puma#controlstatus-server)
-- `AUTH_TOKEN` no default value
-- `BIND_ADDRESS` default value `0.0.0.0:9882` - [prometheus default ports allocation](https://github.com/prometheus/prometheus/wiki/Default-port-allocations)
+```
+make docker
+```
+
+## Github Actions
+
+- just checking that code is able to compile
