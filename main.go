@@ -68,14 +68,14 @@ func main() {
 		cli.StringFlag{
 			Name:   "bind-address,b",
 			Usage:  "Listen address for metrics HTTP endpoint",
-			Value:  "0.0.0.0:9235",
+			Value:  "0.0.0.0:9882",
 			EnvVar: "BIND_ADDRESS",
 		},
 		cli.StringFlag{
 			Name:   "control-url,u",
 			Usage:  "url for the puma control socket",
 			EnvVar: "CONTROL_URL",
-			Value:  "http://127.0.0.1:7353",
+			Value:  "http://127.0.0.1:9293",
 		},
 		cli.StringFlag{
 			Name:   "auth-token,a",

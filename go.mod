@@ -1,4 +1,4 @@
-module github.com/sapcc/puma-exporter
+module github.com/productboard/puma-exporter
 
 go 1.17
 
