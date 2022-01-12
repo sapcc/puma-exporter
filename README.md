@@ -30,3 +30,8 @@ make docker
 ## Github Actions
 
 - just checking that code is able to compile
+
+## TODO
+
+- [ ] reserve port for exporter in official Prometheus documentation
+- [ ] add support for multiarch docker images
