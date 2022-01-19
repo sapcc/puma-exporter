@@ -27,28 +27,78 @@ var (
 </body>
 </html>
 `, versionString()))
-	requestBacklog = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "puma_request_backlog",
-		Help: "Number of requests waiting to be processed by a thread",
+	pumaBacklog = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "puma_backlog",
+		Help: "Number of established but unaccepted connections in the backlog",
+	}, []string{"index"})
+	pumaRunning = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "puma_running",
+		Help: "Number of running worker threads",
+	}, []string{"index"})
+	pumaPoolCapacity = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "puma_pool_capacity",
+		Help: "Number of allocatable worker threads",
+	}, []string{"index"})
+	pumaMaxThreads = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "puma_max_threads",
+		Help: "Maximum number of worker threads",
+	}, []string{"index"})
+	pumaRequestsCount = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "puma_requests_count",
+		Help: "Number of processed requests",
+	}, []string{"index"})
+	pumaWorkers = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "puma_workers",
+		Help: "Number of configured workers",
 	})
-	runningThreads = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "puma_thread_count",
-		Help: "Number of threads currently running",
+	pumaBootedWorkers = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "puma_booted_workers",
+		Help: "Number of booted workers",
 	})
-
+	pumaOldWorkers = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "puma_old_workers",
+		Help: "Number of old workers",
+	})
 	//We use our own registry instead of the default to avoid the standard metrics
 	registry = prometheus.NewRegistry()
 )
 
 type pumaStats struct {
-	RunningThreads int `json:"running"`
-	RequestBacklog int `json:"backlog"`
+	StartedAt     time.Time `json:"started_at"`
+	Workers       int       `json:"workers"`
+	Phase         int       `json:"phase"`
+	BootedWorkers int       `json:"booted_workers"`
+	OldWorkers    int       `json:"old_workers"`
+	WorkerStatus  []struct {
+		StartedAt   time.Time `json:"started_at"`
+		Pid         int       `json:"pid"`
+		Index       int       `json:"index"`
+		Phase       int       `json:"phase"`
+		Booted      bool      `json:"booted"`
+		LastCheckin time.Time `json:"last_checkin"`
+		LastStatus  struct {
+			Backlog       int `json:"backlog"`
+			Running       int `json:"running"`
+			PoolCapacity  int `json:"pool_capacity"`
+			MaxThreads    int `json:"max_threads"`
+			RequestsCount int `json:"requests_count"`
+		} `json:"last_status"`
+	} `json:"worker_status"`
 }
 
 func init() {
 	// Metrics have to be registered to be exposed:
-	registry.MustRegister(requestBacklog)
-	registry.MustRegister(runningThreads)
+	// with workers labels
+	registry.MustRegister(pumaBacklog)
+	registry.MustRegister(pumaRunning)
+	registry.MustRegister(pumaRequestsCount)
+	registry.MustRegister(pumaPoolCapacity)
+	registry.MustRegister(pumaMaxThreads)
+	// without labels
+	registry.MustRegister(pumaWorkers)
+	registry.MustRegister(pumaBootedWorkers)
+	registry.MustRegister(pumaOldWorkers)
+
 }
 
 func main() {
@@ -75,7 +125,7 @@ func main() {
 			Name:   "control-url,u",
 			Usage:  "url for the puma control socket",
 			EnvVar: "CONTROL_URL",
-			Value:  "http://127.0.0.1:9293",
+			Value:  "http://127.0.0.1:9292",
 		},
 		cli.StringFlag{
 			Name:   "auth-token,a",
@@ -121,8 +171,18 @@ func updateMetrics(url string) {
 	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
 		log.Printf("Error decoding response from control server: %s", err)
 	}
-	requestBacklog.Set(float64(stats.RequestBacklog))
-	runningThreads.Set(float64(stats.RunningThreads))
+	// without labels
+	pumaWorkers.Set(float64(stats.Workers))
+	pumaBootedWorkers.Set(float64(stats.BootedWorkers))
+	pumaOldWorkers.Set(float64(stats.OldWorkers))
+	for i, status := range stats.WorkerStatus {
+		index := fmt.Sprintf("%d", i)
+		pumaBacklog.With(prometheus.Labels{"index": index}).Set(float64(status.LastStatus.Backlog))
+		pumaRunning.With(prometheus.Labels{"index": index}).Set(float64(status.LastStatus.Running))
+		pumaRequestsCount.With(prometheus.Labels{"index": index}).Set(float64(status.LastStatus.RequestsCount))
+		pumaPoolCapacity.With(prometheus.Labels{"index": index}).Set(float64(status.LastStatus.PoolCapacity))
+		pumaMaxThreads.With(prometheus.Labels{"index": index}).Set(float64(status.LastStatus.MaxThreads))
+	}
 }
 
 func serveVersion(w http.ResponseWriter, r *http.Request) {
