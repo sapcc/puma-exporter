@@ -51,4 +51,4 @@ git push
 
 ### Update the Helm Charts
 
-`https://github.com/sapcc/helm-charts/blob/master/openstack/elektra/templates/deployment.yaml#L118`
+https://github.com/sapcc/helm-charts/blob/master/openstack/elektra/templates/deployment.yaml#L118
