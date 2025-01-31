@@ -40,3 +40,15 @@ After making changes to the code, you can build and push a new Docker image:
 make docker
 make push
 ```
+
+## Upload the changes to the repo
+
+```bash
+git add -A
+git commit -m "release new version 1.x.x"
+git push
+```
+
+### Update the Helm Charts
+
+`https://github.com/sapcc/helm-charts/blob/master/openstack/elektra/templates/deployment.yaml#L118`
