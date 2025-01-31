@@ -2,7 +2,7 @@ PKG_NAME:=github.com/sapcc/puma-exporter
 BUILD_DIR:=bin
 EXPORTER_BINARY:=$(BUILD_DIR)/puma_exporter
 IMAGE := keppel.eu-de-1.cloud.sap/ccloud/puma-exporter
-VERSION=1.0.4
+VERSION=1.0.5
 LDFLAGS=-s -w -X main.Version=$(VERSION) -X main.GITCOMMIT=`git rev-parse --short HEAD`
 CGO_ENABLED=0
 GOARCH=amd64
