@@ -21,13 +21,20 @@ cd puma-exporter
 make build
 ```
 
-### Usage
+### Usage/Testing
 
 Run the exporter:
 
 ```bash
-./bin/puma-exporter
+./bin/puma_exporter
 ```
+
+### New Release
+
+If you did some changes and want to release a new version, follow these steps:
+
+1. Update the version `VERSION` in the `Makefile`.
+2. Proceed with the Building and pushing a new Docker image section below.
 
 ### Building and pushing a new Docker image
 
