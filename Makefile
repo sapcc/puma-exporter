@@ -24,7 +24,7 @@ linux: export GOARCH=amd64
 linux: build
 
 docker: linux
-	docker build -t $(IMAGE):$(VERSION) .
+	docker build --provenance=false -t $(IMAGE):$(VERSION) .
 
 push:
 	docker push $(IMAGE):$(VERSION)
