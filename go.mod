@@ -7,6 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/prometheus/client_golang v1.21.0
 	github.com/urfave/cli v1.22.16
+	github.com/urfave/cli/v3 v3.3.8
 )
 
 require (
